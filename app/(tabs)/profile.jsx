@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Image, FlatList, TouchableOpacity } from "react-native";
+import { useState } from "react";
 
 import { icons } from "../../constants";
 import useAppwrite from "../../lib/useAppwrite";
@@ -10,14 +11,30 @@ import { EmptyState, InfoBox, VideoCard } from "../../components";
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
-  const { data: posts } = useAppwrite(() => getUserPosts(user.$id));
+  const { data: posts, refetch } = useAppwrite(() => getUserPosts(user.$id));
+  const [comments, setComments] = useState({});
 
   const logout = async () => {
     await signOut();
     setUser(null);
     setIsLogged(false);
-
     router.replace("/sign-in");
+  };
+
+  // Function to handle adding a comment
+  const handleAddComment = (postId, commentText) => {
+    setComments(prevComments => ({
+      ...prevComments,
+      [postId]: [...(prevComments[postId] || []), { id: Date.now().toString(), text: commentText }]
+    }));
+  };
+
+  // Function to handle removing a comment
+  const handleRemoveComment = (postId, commentId) => {
+    setComments(prevComments => ({
+      ...prevComments,
+      [postId]: prevComments[postId].filter(comment => comment.id !== commentId)
+    }));
   };
 
   return (
@@ -32,6 +49,9 @@ const Profile = () => {
             video={item.video}
             creator={item.creator.username}
             avatar={item.creator.avatar}
+            comments={comments[item.$id] || []}
+            onAddComment={(commentText) => handleAddComment(item.$id, commentText)}
+            onRemoveComment={(commentId) => handleRemoveComment(item.$id, commentId)}
           />
         )}
         ListEmptyComponent={() => (

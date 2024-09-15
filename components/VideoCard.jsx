@@ -1,49 +1,38 @@
 import { useState } from "react";
 import { ResizeMode, Video } from "expo-av";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import CommentSection from "./CommentSection"; // Asegúrate de que la ruta sea correcta
 
 import { icons } from "../constants";
 
-const VideoCard = ({ title, creator, avatar, thumbnail, video }) => {
+const VideoCard = ({ title, creator, avatar, thumbnail, video, comments, onAddComment, onRemoveComment }) => {
   const [play, setPlay] = useState(false);
 
   return (
-    <View className="flex flex-col items-center px-4 mb-14">
-      <View className="flex flex-row gap-3 items-start">
-        <View className="flex justify-center items-center flex-row flex-1">
-          <View className="w-[46px] h-[46px] rounded-lg border border-secondary flex justify-center items-center p-0.5">
-            <Image
-              source={{ uri: avatar }}
-              className="w-full h-full rounded-lg"
-              resizeMode="cover"
-            />
-          </View>
-
-          <View className="flex justify-center flex-1 ml-3 gap-y-1">
-            <Text
-              className="font-psemibold text-sm text-white"
-              numberOfLines={1}
-            >
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.profileContainer}>
+          <Image
+            source={{ uri: avatar }}
+            style={styles.avatar}
+            resizeMode="cover"
+          />
+          <View style={styles.textContainer}>
+            <Text style={styles.title} numberOfLines={1}>
               {title}
             </Text>
-            <Text
-              className="text-xs text-gray-100 font-pregular"
-              numberOfLines={1}
-            >
+            <Text style={styles.creator} numberOfLines={1}>
               {creator}
             </Text>
           </View>
         </View>
-
-        <View className="pt-2">
-          <Image source={icons.menu} className="w-5 h-5" resizeMode="contain" />
-        </View>
+        <Image source={icons.menu} style={styles.menuIcon} resizeMode="contain" />
       </View>
 
       {play ? (
         <Video
           source={{ uri: video }}
-          className="w-full h-60 rounded-xl mt-3"
+          style={styles.video}
           resizeMode={ResizeMode.CONTAIN}
           useNativeControls
           shouldPlay
@@ -57,23 +46,94 @@ const VideoCard = ({ title, creator, avatar, thumbnail, video }) => {
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => setPlay(true)}
-          className="w-full h-60 rounded-xl mt-3 relative flex justify-center items-center"
+          style={styles.thumbnailContainer}
         >
           <Image
             source={{ uri: thumbnail }}
-            className="w-full h-full rounded-xl mt-3"
+            style={styles.thumbnail}
             resizeMode="cover"
           />
-
           <Image
             source={icons.play}
-            className="w-12 h-12 absolute"
+            style={styles.playIcon}
             resizeMode="contain"
           />
         </TouchableOpacity>
       )}
+
+      <CommentSection
+        comments={comments || []}
+        onAddComment={onAddComment}
+        onRemoveComment={onRemoveComment}
+      />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 14,
+    paddingHorizontal: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  profileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  avatar: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderColor: '#999',
+    borderWidth: 1,
+  },
+  textContainer: {
+    marginLeft: 10,
+    flex: 1,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  creator: {
+    color: '#aaa',
+    fontSize: 12,
+  },
+  menuIcon: {
+    width: 24,
+    height: 24,
+  },
+  video: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  thumbnailContainer: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginTop: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  thumbnail: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  playIcon: {
+    width: 48,
+    height: 48,
+    position: 'absolute',
+  },
+});
 
 export default VideoCard;
